@@ -1,0 +1,66 @@
+- hosts: all
+  become: true
+  become_method: sudo
+  become_user: root
+
+  tasks:
+    - name: Adding user {{ user }}
+      user:
+        name: "{{ user }}"
+        groups: sudo
+        append: yes
+    - name: Runing "apt-get update"
+      apt:
+        update_cache: yes
+    - name: Install basics
+      apt:
+        pkg:
+          - curl
+          - git
+          - vim
+          - nfs-common
+          - vim
+          - default-jdk
+          - jq
+          - ca-certificates
+          - gnupg
+          - lsb-release
+          - maven
+          - nodejs
+    - name: Install fish
+      apt:
+        pkg:
+          - fish
+          - fzf
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu focal stable
+        state: present
+    - name: Update apt and install docker-ce
+      apt:
+        name: docker-ce
+        state: latest
+        update_cache: true
+    - name: Update apt and install docker compose
+      apt:
+        name: docker-compose-plugin
+        state: latest
+        update_cache: true
+    - name: install kubernetes
+      shell: |
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
+        install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+    - name: install helm
+      shell: |
+        curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+        chmod 700 get_helm.sh
+        ./get_helm.sh
+    - name: Install k9s
+      apt:
+        name: k9s
+        state: present
