@@ -1,3 +1,0 @@
-[home]
-; 192.168.1.5  ansible_user=pi
-192.168.1.6  ansible_user=berkay

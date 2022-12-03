@@ -9,11 +9,16 @@
         name: "{{ user }}"
         groups: sudo
         append: yes
+    - name: add packages
+      shell: |
+        echo 'deb http://download.opensuse.org/repositories/shells:/fish:/release:/3/Debian_11/ /' | tee /etc/apt/sources.list.d/shells:fish:release:3.list
+        curl -fsSL https://download.opensuse.org/repositories/shells:fish:release:3/Debian_11/Release.key | gpg --dearmor | tee /etc/apt/trusted.gpg.d/shells_fish_release_3.gpg > /dev/null
     - name: Runing "apt-get update"
       apt:
         update_cache: yes
     - name: Install basics
       apt:
+        state: latest
         pkg:
           - curl
           - git
@@ -29,9 +34,14 @@
           - nodejs
     - name: Install fish
       apt:
+        state: latest
         pkg:
           - fish
           - fzf
+    - name: make fish default shell
+      shell: |
+        echo /usr/bin/fish | tee -a /etc/shells
+        chsh -s /usr/bin/fish {{ user }} 
     - name: Add Docker GPG apt Key
       apt_key:
         url: https://download.docker.com/linux/ubuntu/gpg
@@ -52,15 +62,18 @@
         update_cache: true
     - name: install kubernetes
       shell: |
-        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-        echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
-        install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+        curl -fsSLo /etc/apt/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list
+        apt-get install -y kubectl
     - name: install helm
       shell: |
         curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
         chmod 700 get_helm.sh
         ./get_helm.sh
-    - name: Install k9s
-      apt:
-        name: k9s
-        state: present
+    # - name: Install k9s
+    #   apt:
+    #     name: k9s
+    #     state: present
+    - name: clean up
+      shell: |
+        rm -rf get_helm.sh kubectl
