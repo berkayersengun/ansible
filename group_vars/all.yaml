@@ -1,3 +1,5 @@
 # ansible_python_interpreter: /usr/bin/python3.10
-ansible_become_password: 
-user: pi
+# ansible_become_password:
+user: ersnbrk
+# ansible_user: berkay
+# ansible_password:

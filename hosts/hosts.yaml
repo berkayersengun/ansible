@@ -1,0 +1,14 @@
+local:
+  hosts:
+    localhost:
+      ansible_connection: local
+
+pi:
+  hosts:
+    192.168.2.16:
+
+all:
+  hosts:
+    localhost:
+      ansible_connection: local
+    192.168.2.16:

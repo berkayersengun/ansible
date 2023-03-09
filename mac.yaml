@@ -1,0 +1,38 @@
+- hosts: local
+  # become: true
+  # become_method: sudo
+  # become_user: root
+
+  tasks:
+    # hosts: all
+    # - name: test connection
+    #   ansible.builtin.ping:
+    - name: Upgrade packages
+      homebrew:
+        update_homebrew: yes
+        upgrade_all: yes
+    - name: Install basics
+      homebrew:
+        name:
+          - fish
+          - fzf
+          - wget
+          - tree
+          - maven
+          - openjdk
+          - maccy
+          - jq
+    - name: Install Cloud
+      homebrew:
+        name:
+          - k9s
+          - k6
+          - helm
+          - helmfile
+          - lens
+    - name: make fish default shell
+      shell: |
+        which fish | sudo tee -a /etc/shells
+        chsh -s $(which fish) {{ user }}
+    - name: install fzf keybindings
+      shell: /opt/homebrew/opt/fzf/install
